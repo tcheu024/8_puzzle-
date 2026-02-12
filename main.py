@@ -7,8 +7,8 @@ goal_state = (1,2,3
 
 #Hardcoded default puzzle for testing purposes
 def default_puzzle():
-    return (1,2,0
-            ,4,5,3
+    return (1,2,3
+            ,4,0,5
             ,7,8,6)
 
 #Fuction to create unique puzzle
@@ -33,40 +33,54 @@ def custom_puzzle():
 def general_search(initial_state, QUEUING_FUNCTION):
     #create a initial node with the initial state
     nodes = []
-    heapq.heappush(nodes, (0, initial_state, 0, None)) 
-    explored = set()
+    heapq.heappush(nodes, (0, initial_state, 0, None))
     
+    g_score = {initial_state: 0}  # Initialize g(n) for the initial state
+    nodes_expanded = 0
 
     while True:
         if not nodes:
             return "failure"
         
-        cost, state, depth, parent = heapq.heappop(nodes)
-        explored.add(state) 
+        f_n, state, g_n, parent = heapq.heappop(nodes)
+
+        if g_n > g_score.get(state, float('inf')):
+            continue
+        
         #remove-front (nodes)
-        h_n = cost - depth
-        print("Initial state:", state, "Cost:", cost, "Depth:", depth, "h(n):", h_n)
+        h_n = f_n - g_n
+        print("Initial state:", state, "Cost:", f_n, "Depth:", g_n, "h(n):", h_n)
 
         if goal_state == state:
             print("Found goal state!")
-            return (cost, state, depth, parent)
-        
+            return (f_n, state, g_n, parent)
+
+        nodes_expanded += 1
+
         children = expand(state)
         childrens = []
 
         for child in children:
-            if child not in explored:
-                childrens.append((cost + 1, child, depth + 1, state))
+            new_gn = g_n + 1
 
-        nodes = QUEUING_FUNCTION(nodes, state, childrens, parent, cost)
-
-    parent = state
+            if child not in g_score or new_gn < g_score[child]:
+                g_score[child] = new_gn
+                childrens.append((0, child, new_gn, state))
+        
+        nodes = QUEUING_FUNCTION(nodes, childrens)
+    
     pass
 
-def QUEUING_FUNCTION(nodes, state, children, parent, best_cost):
+def uniform_cost_search(nodes, children):
+    # children is a list of tuples (cost, state, depth, parent)
     for child in children:
-        heapq.heappush(nodes, child)
+        f_n, state, g_n, parent = child
+        f_n = g_n
+        heapq.heappush(nodes, (f_n, state, g_n, parent))
+
     return nodes
+
+
 
 def expand(state):
     children = []
@@ -103,8 +117,13 @@ def expand(state):
 
 
 puzzle = default_puzzle()
-result = general_search(puzzle, QUEUING_FUNCTION)
+result = general_search(puzzle, uniform_cost_search)
 print("Result:", result)
 
 ##puzzle = custom_puzzle()
 ##print("Puzzle tuple:", puzzle)
+
+# def QUEUING_FUNCTION(nodes, state, children, parent, best_cost):
+#     for child in children:
+#         heapq.heappush(nodes, child)
+#     return nodes
