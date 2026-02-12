@@ -7,9 +7,9 @@ goal_state = (1,2,3
 
 #Hardcoded default puzzle for testing purposes
 def default_puzzle():
-    return (1,2,3
-            ,4,5,6
-            ,7,8,0)
+    return (1,2,0
+            ,4,5,3
+            ,7,8,6)
 
 #Fuction to create unique puzzle
 def custom_puzzle():
@@ -33,30 +33,39 @@ def custom_puzzle():
 def general_search(initial_state, QUEUING_FUNCTION):
     #create a initial node with the initial state
     nodes = []
-    heapq.heappush(nodes, (0, initial_state))  
-
-    parent = None
-    best_cost = 0
+    heapq.heappush(nodes, (0, initial_state, 0, None)) 
+    explored = set()
+    
 
     while True:
         if not nodes:
             return "failure"
         
+        cost, state, depth, parent = heapq.heappop(nodes)
+        explored.add(state) 
         #remove-front (nodes)
-        state = heapq.heappop(nodes)[1] 
-        print("popped:", state)
+        h_n = cost - depth
+        print("Initial state:", state, "Cost:", cost, "Depth:", depth, "h(n):", h_n)
 
         if goal_state == state:
             print("Found goal state!")
-            return state
+            return (cost, state, depth, parent)
         
         children = expand(state)
-        nodes = QUEUING_FUNCTION(nodes, state, children, parent, best_cost)
+        childrens = []
+
+        for child in children:
+            if child not in explored:
+                childrens.append((cost + 1, child, depth + 1, state))
+
+        nodes = QUEUING_FUNCTION(nodes, state, childrens, parent, cost)
 
     parent = state
     pass
 
 def QUEUING_FUNCTION(nodes, state, children, parent, best_cost):
+    for child in children:
+        heapq.heappush(nodes, child)
     return nodes
 
 def expand(state):
@@ -93,8 +102,9 @@ def expand(state):
 
 
 
-puzzle = custom_puzzle()
-print("Puzzle tuple:", puzzle)
-
+puzzle = default_puzzle()
 result = general_search(puzzle, QUEUING_FUNCTION)
 print("Result:", result)
+
+##puzzle = custom_puzzle()
+##print("Puzzle tuple:", puzzle)
