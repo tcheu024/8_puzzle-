@@ -60,7 +60,36 @@ def QUEUING_FUNCTION(nodes, state, children, parent, best_cost):
     return nodes
 
 def expand(state):
-    return []
+    children = []
+
+    zero =state.index(0)
+    row = zero // 3
+    col = zero % 3
+
+    # Move up
+    if row > 0:  
+        new_state = list(state)
+        new_state[zero], new_state[zero - 3] = new_state[zero - 3], new_state[zero]
+        children.append(tuple(new_state))
+
+    #Move down
+    if row < 2:  
+        new_state = list(state)
+        new_state[zero], new_state[zero + 3] = new_state[zero + 3], new_state[zero]
+        children.append(tuple(new_state))
+
+    #Move left
+    if col > 0:  
+        new_state = list(state)
+        new_state[zero], new_state[zero - 1] = new_state[zero - 1], new_state[zero]
+        children.append(tuple(new_state))
+    
+    #Move right
+    if col < 2:  
+        new_state = list(state)
+        new_state[zero], new_state[zero + 1] = new_state[zero + 1], new_state[zero]
+        children.append(tuple(new_state))
+    return children
 
 
 
