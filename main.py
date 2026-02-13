@@ -1,4 +1,5 @@
 import heapq
+import time 
 
 #The goal state for 3x3 puzzle
 goal_state = (1,2,3
@@ -81,7 +82,6 @@ def uniform_cost_search(nodes, children):
     return nodes
 
 
-
 def expand(state):
     children = []
 
@@ -114,11 +114,46 @@ def expand(state):
         children.append(tuple(new_state))
     return children
 
+def misplaced_tiles_h(state):
+    count = 0
+    for i in range(len(state)):
+        if state[i] != 0 and state[i] != goal_state[i]:
+            count += 1
+    return count
+
+def misplaced_tiles_queueing(nodes, children):
+    for child in children: 
+        f_n, state, g_n, parent = child
+        h_n = misplaced_tiles_h(state)
+        f_n = g_n + h_n
+        heapq.heappush(nodes, (f_n, state, g_n, parent))
+
+    return nodes
+
 
 
 puzzle = default_puzzle()
-result = general_search(puzzle, uniform_cost_search)
-print("Result:", result)
+print("Select which algorithm to use:")
+print("1. Uniform Cost Search")
+print("2. A* with Misplaced Tiles Heuristic")
+print("3. A* with Manhattan Distance Heuristic")
+choice = input("Enter the number of your choice: ")
+puzzle = default_puzzle()
+if choice == '1':
+    start= time.time()
+    result = general_search(puzzle, uniform_cost_search)
+    elapsed = (time.time() - start)*1000
+    print("Result:", result)
+    print("Elapsed time(ms):", elapsed)
+elif choice == '2':
+    start= time.time()
+    result = general_search(puzzle, misplaced_tiles_queueing)
+    elapsed = (time.time() - start)*1000
+    print("Result:", result)
+    print("Elapsed time(ms):", elapsed)
+else:
+    print("Invalid choice. Please select 1, 2, or 3.")
+
 
 ##puzzle = custom_puzzle()
 ##print("Puzzle tuple:", puzzle)
