@@ -31,29 +31,54 @@ def custom_puzzle():
 
     return tuple(nums)
 
+def print_node(state, g_n, h_n, f_n, number):
+    print("Expansion #", number)
+    print("Path Cost:", g_n)
+    print("Heuristic:", h_n)
+    print("Total Cost:", f_n)
+    
+
+    for i in range(0, len(state), 3):
+        print(state[i:i+3])
+    
+    print(" ")
+
+
 def general_search(initial_state, QUEUING_FUNCTION):
     #create a initial node with the initial state
     nodes = []
-    heapq.heappush(nodes, (0, initial_state, 0, None))
+    
+    #heapq.heappush(nodes, (0, initial_state, 0, None))
+
+    initial_children = [(0, initial_state, 0, None)]
+    nodes = QUEUING_FUNCTION(nodes, initial_children)
     
     g_score = {initial_state: 0}  # Initialize g(n) for the initial state
     nodes_expanded = 0
+    max_queue_size = 1
+
+   
 
     while True:
         if not nodes:
             return "failure"
         
+        max_queue_size = max(max_queue_size, len(nodes))
+        
+        #remove-front (nodes)
         f_n, state, g_n, parent = heapq.heappop(nodes)
 
         if g_n > g_score.get(state, float('inf')):
             continue
-        
-        #remove-front (nodes)
-        h_n = f_n - g_n
-        print("Popped:", state, "Cost:", f_n, "Depth:", g_n, "h(n):", h_n)
 
+        h_n = f_n - g_n
+        print_node(state, g_n= g_n, h_n= h_n, f_n= f_n, number= nodes_expanded + 1)
         if goal_state == state:
             print("Found goal state!")
+            print("Total nodes expanded:", nodes_expanded)
+            print("Depth:", g_n)
+            print("Max queue size:", max_queue_size)
+            print("")
             return (f_n, state, g_n, parent)
 
         nodes_expanded += 1
@@ -70,7 +95,7 @@ def general_search(initial_state, QUEUING_FUNCTION):
         
         nodes = QUEUING_FUNCTION(nodes, childrens)
     
-    pass
+    
 
 def uniform_cost_search(nodes, children):
     # children is a list of tuples (cost, state, depth, parent)
@@ -137,7 +162,7 @@ def manhattan_distance_h(state):
             current_row = i // 3
             current_col = i % 3
 
-            goal_index = state[i] - 1
+            goal_index = goal_state.index(state[i])
             goal_row = goal_index // 3
             goal_col = goal_index % 3
             distance += abs(current_row - goal_row) + abs(current_col - goal_col)
