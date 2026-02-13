@@ -27,7 +27,7 @@ def custom_puzzle():
 
     if sorted(nums) != list(range(dimension*dimension)):
         print("There should be only 1 of each number, Retry.")
-        return 0
+        return None
 
     return tuple(nums)
 
@@ -50,7 +50,7 @@ def general_search(initial_state, QUEUING_FUNCTION):
         
         #remove-front (nodes)
         h_n = f_n - g_n
-        print("Initial state:", state, "Cost:", f_n, "Depth:", g_n, "h(n):", h_n)
+        print("Popped:", state, "Cost:", f_n, "Depth:", g_n, "h(n):", h_n)
 
         if goal_state == state:
             print("Found goal state!")
@@ -130,6 +130,27 @@ def misplaced_tiles_queueing(nodes, children):
 
     return nodes
 
+def manhattan_distance_h(state):
+    distance = 0
+    for i in range(len(state)):
+        if state[i] != 0:
+            current_row = i // 3
+            current_col = i % 3
+
+            goal_index = state[i] - 1
+            goal_row = goal_index // 3
+            goal_col = goal_index % 3
+            distance += abs(current_row - goal_row) + abs(current_col - goal_col)
+    return distance
+
+def manhattan_distance_queueing(nodes, children):
+    #f(n) = g(n) + h(n)
+    for child in children:
+        f_n, state, g_n, parent = child
+        h_n = manhattan_distance_h(state)
+        f_n = g_n + h_n
+        heapq.heappush(nodes, (f_n, state, g_n, parent))
+    return nodes
 
 
 puzzle = default_puzzle()
@@ -151,14 +172,11 @@ elif choice == '2':
     elapsed = (time.time() - start)*1000
     print("Result:", result)
     print("Elapsed time(ms):", elapsed)
+elif choice == '3':
+    start= time.time()
+    result = general_search(puzzle, manhattan_distance_queueing)
+    elapsed = (time.time() - start)*1000
+    print("Result:", result)
+    print("Elapsed time(ms):", elapsed)
 else:
     print("Invalid choice. Please select 1, 2, or 3.")
-
-
-##puzzle = custom_puzzle()
-##print("Puzzle tuple:", puzzle)
-
-# def QUEUING_FUNCTION(nodes, state, children, parent, best_cost):
-#     for child in children:
-#         heapq.heappush(nodes, child)
-#     return nodes
