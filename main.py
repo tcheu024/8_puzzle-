@@ -7,10 +7,44 @@ goal_state = (1,2,3
               ,7,8,0)
 
 #Hardcoded default puzzle for testing purposes
-def default_puzzle():
-    return (1,2,3
-            ,4,0,5
-            ,7,8,6)
+def test_puzzle(choice):
+    puzzle = choice
+    if puzzle == 1:
+        return (1,2,3
+                ,4,5,6
+                ,7,8,0)
+    if puzzle == 2:
+        return (1,2,3
+                ,4,5,6
+                ,0,7,8)
+    if puzzle == 3:
+        return (1,2,3
+                ,5,0,6
+                ,4,7,8)
+    if puzzle == 4:
+        return (1,3,6
+                ,5,0,2
+                ,4,7,8)
+    if puzzle == 5:
+        return (1,3,6
+                ,5,0,7
+                ,4,8,2)
+    if puzzle == 6:
+        return (1,6,7
+                ,5,0,3
+                ,4,8,2)
+    if puzzle == 7:
+        return (7,1,2
+                ,4,8,5
+                ,6,3,0)
+    if puzzle == 8:
+        return (0,7,2
+                ,4,6,1
+                ,3,5,8)
+    if puzzle == 9:
+        return custom_puzzle()
+    else:
+        return None
 
 #Fuction to create unique puzzle
 def custom_puzzle():
@@ -56,8 +90,6 @@ def general_search(initial_state, QUEUING_FUNCTION):
     g_score = {initial_state: 0}  # Initialize g(n) for the initial state
     nodes_expanded = 0
     max_queue_size = 1
-
-   
 
     while True:
         if not nodes:
@@ -178,13 +210,29 @@ def manhattan_distance_queueing(nodes, children):
     return nodes
 
 
-puzzle = default_puzzle()
+
+#MAIN FUNCTION
+print("Choose the depth of the puzzle you want to solve")
+print("1. Depth 0 (Already solved)")
+print("2. Depth 2")
+print("3. Depth 4")
+print("4. Depth 8")
+print("5. Depth 12")
+print("6. Depth 16")
+print("7. Depth 20")
+print("8. Depth 24")
+print("9. Create your own puzzle")
+
+choice2 = int(input("Enter the number of your choice: "))
+puzzle = test_puzzle(choice2)
+
 print("Select which algorithm to use:")
 print("1. Uniform Cost Search")
 print("2. A* with Misplaced Tiles Heuristic")
 print("3. A* with Manhattan Distance Heuristic")
+
 choice = input("Enter the number of your choice: ")
-puzzle = default_puzzle()
+
 if choice == '1':
     start= time.time()
     result = general_search(puzzle, uniform_cost_search)
