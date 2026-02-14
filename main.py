@@ -71,23 +71,45 @@ def print_node(state, g_n, h_n, f_n, number):
     print("Heuristic:", h_n)
     print("Total Cost:", f_n)
     
-
     for i in range(0, len(state), 3):
         print(state[i:i+3])
     
     print(" ")
 
 
+def print_solution(goal_state_final, parent_map):
+    path = []
+    current = goal_state_final  # Start from the goal state
+    
+    # Follow parent pointers backwards
+    while current is not None:
+        path.append(current)
+        current = parent_map.get(current)
+    
+    # Reverse to get path from start to goal
+    path.reverse()
+
+    print(" ")
+    print("SOLUTION PATH")
+    print(" ")
+    for i, state in enumerate(path):
+        print("Step", i)
+        for j in range(0, len(state), 3):
+            print(state[j:j+3])
+        if i < len(path) - 1:  
+            print(" ")
+
+
 def general_search(initial_state, QUEUING_FUNCTION):
     #create a initial node with the initial state
     nodes = []
     
-    #heapq.heappush(nodes, (0, initial_state, 0, None))
-
     initial_children = [(0, initial_state, 0, None)]
     nodes = QUEUING_FUNCTION(nodes, initial_children)
     
     g_score = {initial_state: 0}  # Initialize g(n) for the initial state
+    parent_map = {initial_state: None} 
+    
     nodes_expanded = 0
     max_queue_size = 1
 
@@ -105,13 +127,23 @@ def general_search(initial_state, QUEUING_FUNCTION):
 
         h_n = f_n - g_n
         print_node(state, g_n= g_n, h_n= h_n, f_n= f_n, number= nodes_expanded + 1)
+        
         if goal_state == state:
-            print("Found goal state!")
-            print("Total nodes expanded:", nodes_expanded)
+            
+            
+            print_solution(state, parent_map)
+            print(" ")
+            print("Total nodes expanded:", nodes_expanded + 1)
             print("Depth:", g_n)
             print("Max queue size:", max_queue_size)
+            print("Elapsed time(ms):", (time.time() - start)*1000)
             print("")
-            return (f_n, state, g_n, parent)
+           
+            return {
+                'depth': g_n,
+                'nodes_expanded': nodes_expanded + 1,
+                'max_queue_size': max_queue_size
+            }
 
         nodes_expanded += 1
 
@@ -123,11 +155,10 @@ def general_search(initial_state, QUEUING_FUNCTION):
 
             if child not in g_score or new_gn < g_score[child]:
                 g_score[child] = new_gn
+                parent_map[child] = state
                 childrens.append((0, child, new_gn, state))
         
         nodes = QUEUING_FUNCTION(nodes, childrens)
-    
-    
 
 def uniform_cost_search(nodes, children):
     # children is a list of tuples (cost, state, depth, parent)
@@ -137,7 +168,6 @@ def uniform_cost_search(nodes, children):
         heapq.heappush(nodes, (f_n, state, g_n, parent))
 
     return nodes
-
 
 def expand(state):
     children = []
@@ -237,19 +267,17 @@ if choice == '1':
     start= time.time()
     result = general_search(puzzle, uniform_cost_search)
     elapsed = (time.time() - start)*1000
-    print("Result:", result)
-    print("Elapsed time(ms):", elapsed)
+    
+        
 elif choice == '2':
     start= time.time()
     result = general_search(puzzle, misplaced_tiles_queueing)
     elapsed = (time.time() - start)*1000
-    print("Result:", result)
-    print("Elapsed time(ms):", elapsed)
+    
+        
 elif choice == '3':
     start= time.time()
     result = general_search(puzzle, manhattan_distance_queueing)
     elapsed = (time.time() - start)*1000
-    print("Result:", result)
-    print("Elapsed time(ms):", elapsed)
 else:
     print("Invalid choice. Please select 1, 2, or 3.")
