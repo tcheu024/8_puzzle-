@@ -5,7 +5,6 @@ import time
 goal_state = (1,2,3
               ,4,5,6
               ,7,8,0)
-
 #Returns a puzzle based on the user's choice of depth
 #Also allows the user to create their own unique puzzle if they want to
 #The puzzles are from the project specifictions
@@ -52,7 +51,6 @@ def test_puzzle(choice):
 def custom_puzzle():
     print("Create puzzle, using a 0 to represent the blank tile.")
     dimension = int(input("How many rows and columns does your puzzle have? "))
-
     nums = []
     #Get the numbers for each row of the puzzle from the user, and add them to a list
     for i in range(dimension):
@@ -65,7 +63,6 @@ def custom_puzzle():
     if sorted(nums) != list(range(dimension*dimension)):
         print("There should be only 1 of each number, Retry.")
         return None
-
     return tuple(nums)
 
 # Prints detailed information about a node being expanded during search
@@ -75,17 +72,15 @@ def print_node(state, g_n, h_n, f_n, number):
     print("Path Cost:", g_n)
     print("Heuristic:", h_n)
     print("Total Cost:", f_n)
-    
+
     for i in range(0, len(state), 3):
         print(state[i:i+3])
-    
     print(" ")
 
 #Reconstructs and prints the solution path from initial state to goal.
 def print_solution(goal_state_final, parent_map):
     path = []
     current = goal_state_final  # Start from the goal state
-    
     # Follow parent pointers backwards
     while current is not None:
         path.append(current)
@@ -93,7 +88,6 @@ def print_solution(goal_state_final, parent_map):
     
     # Reverse to get path from start to goal
     path.reverse()
-
     print(" ")
     print("SOLUTION PATH")
     print(" ")
@@ -108,7 +102,6 @@ def print_solution(goal_state_final, parent_map):
 def general_search(initial_state, QUEUING_FUNCTION):
     #creates a priority queue to store the nodes to be expanded
     nodes = []
-    
     initial_children = [(0, initial_state, 0, None)]
     nodes = QUEUING_FUNCTION(nodes, initial_children)
     # Initialize g(n) for the initial state
@@ -130,7 +123,7 @@ def general_search(initial_state, QUEUING_FUNCTION):
         # Skip this node if there is a better path to this state
         if g_n > g_score.get(state, float('inf')):
             continue
-        
+
         h_n = f_n - g_n
         print_node(state, g_n= g_n, h_n= h_n, f_n= f_n, number= nodes_expanded + 1)
         
@@ -143,13 +136,11 @@ def general_search(initial_state, QUEUING_FUNCTION):
             print("Max queue size:", max_queue_size)
             print("Elapsed time(ms):", (time.time() - start)*1000)
             print("")
-           
             return {
                 'depth': g_n,
                 'nodes_expanded': nodes_expanded + 1,
                 'max_queue_size': max_queue_size
             }
-
         nodes_expanded += 1
         # Generate children states
         children = expand(state)
@@ -157,12 +148,10 @@ def general_search(initial_state, QUEUING_FUNCTION):
         #For each child state, calculate g(n) and update the queue and parent map 
         for child in children:
             new_gn = g_n + 1
-
             if child not in g_score or new_gn < g_score[child]:
                 g_score[child] = new_gn
                 parent_map[child] = state
                 childrens.append((0, child, new_gn, state))
-        
         nodes = QUEUING_FUNCTION(nodes, childrens)
 
 #Uniform Cost Search implementation of the queuing function
@@ -173,14 +162,12 @@ def uniform_cost_search(nodes, children):
         f_n, state, g_n, parent = child
         f_n = g_n
         heapq.heappush(nodes, (f_n, state, g_n, parent))
-
     return nodes
 
 #expand function generates the child states of a given state by moving the blank tile (0) in all possible directions
 # returns a list of the resulting states.
 def expand(state):
     children = []
-
     zero =state.index(0)
     row = zero // 3
     col = zero % 3
@@ -225,7 +212,6 @@ def misplaced_tiles_queueing(nodes, children):
         h_n = misplaced_tiles_h(state)
         f_n = g_n + h_n
         heapq.heappush(nodes, (f_n, state, g_n, parent))
-
     return nodes
 
 #Calculate the Manhattan distance for each tile 
@@ -237,7 +223,6 @@ def manhattan_distance_h(state):
         if state[i] != 0:
             current_row = i // 3
             current_col = i % 3
-
             goal_index = goal_state.index(state[i])
             goal_row = goal_index // 3
             goal_col = goal_index % 3
@@ -253,8 +238,6 @@ def manhattan_distance_queueing(nodes, children):
         f_n = g_n + h_n
         heapq.heappush(nodes, (f_n, state, g_n, parent))
     return nodes
-
-
 
 #MAIN FUNCTION
 print("Choose the depth of the puzzle you want to solve")
